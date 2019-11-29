@@ -1,0 +1,47 @@
+<table
+  style="margin: 10px; width: 100% !important;"
+  mat-table
+  [dataSource]="dataSource"
+  class="mat-elevation-z8"
+>
+  <ng-container
+    *ngFor="let col of tableCols; let i = index"
+    [matColumnDef]="col.key"
+  >
+    <th mat-header-cell *matHeaderCellDef>{{ tableCols[i]["display"] }}</th>
+    <td mat-cell *matCellDef="let element">
+      <!-- Checking if it's a normal column or column with specific config -->
+      <ng-container *ngIf="!col.config; else hasConfig">
+        {{ element[col.key] }}
+      </ng-container>
+      <!-- If this column has a config object so we will display depending
+      on our setted config -->
+      <ng-template #hasConfig>
+        <!-- if this attribute is a boolean, we will show values from config
+        object depending on his state -->
+        <ng-container *ngIf="col.config.isBoolean">
+          {{ showBooleanValue(element, col) }}
+        </ng-container>
+        <!-- if this attribute is a date, we will format it depending on format
+          value in config object -->
+        <ng-container *ngIf="col.config.isDate">
+          {{ element[col.key] | date: col.config.format }}
+        </ng-container>
+        <!-- if this column is action, we will loop through each action and show
+          it as a mat-button -->
+        <ng-container *ngIf="col.config.isAction">
+          <button
+            *ngFor="let action of col.config.actions"
+            (click)="emitter.emit(action)"
+            mat-button
+          >
+            {{ action }}
+          </button>
+        </ng-container>
+      </ng-template>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="keys"></tr>
+  <tr mat-row *matRowDef="let row; columns: keys"></tr>
+</table>
